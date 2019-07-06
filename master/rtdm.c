@@ -34,7 +34,7 @@
 #include <linux/slab.h>
 #include <linux/mman.h>
 
-#include <rtdm/rtdm_driver.h>
+#include <rtdm/driver.h>
 
 #include "master.h"
 #include "ioctl.h"
