@@ -613,7 +613,8 @@ int ecrt_master_activate(ec_master_t *master)
     // will return 0 process_data_size if domain data has already been set up
     if (io.process_data_size) {
         master->process_data_size = io.process_data_size;
-
+    }
+    
     if (master->process_data_size) {
         master->process_data = mmap(0, master->process_data_size,
                 PROT_READ | PROT_WRITE, MAP_SHARED, master->fd, 0);
