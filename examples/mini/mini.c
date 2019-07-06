@@ -502,7 +502,6 @@ int __init init_mini_module(void)
      timer_setup(&timer, cyclic_task, 0);
 #endif
     timer.function = cyclic_task;
-#endif
     timer.expires = jiffies + 10;
     add_timer(&timer);
 
