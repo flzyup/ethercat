@@ -33,11 +33,7 @@
 
 /*****************************************************************************/
 
-#ifdef USE_RTDM
-#include <rtdm/rtdm.h>
-#else
 #include <sys/ioctl.h>
-#endif
 
 /*****************************************************************************/
 
@@ -45,22 +41,9 @@
 
 /*****************************************************************************/
 
-#ifdef USE_RTDM
-
-#define ioctl rt_dev_ioctl
-
-/* rt_dev_ioctl() returns negative error code */
-#define EC_IOCTL_IS_ERROR(X) ((X) < 0)
-#define EC_IOCTL_ERRNO(X) (-(X))
-
-/* print errors to syslog */
-#define	KERN_ERR	"<3>"
-#define EC_PRINT_ERR(fmt, args...) \
-    rt_printk(KERN_ERR "EtherCAT ERROR: " fmt, ##args) 
-
-#else
-
-#define ioctl ioctl
+/* FIXME : historical code inherited from difference 
+           between RTDM ioctl an normal ioctl 
+           -> should ioctl.h be removed ? */
 
 /* libc's ioctl() always returns -1 on error and sets errno */
 #define EC_IOCTL_IS_ERROR(X) ((X) == -1)
@@ -71,8 +54,6 @@
     fprintf(stderr, fmt, ##args) 
 
 #include <errno.h>
-
-#endif
 
 /*****************************************************************************/
 

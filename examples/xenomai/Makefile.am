@@ -34,12 +34,10 @@ ec_xenomai_example_SOURCES = main.c
 ec_xenomai_example_CFLAGS = \
 	-Wall \
 	-I$(top_srcdir)/include \
-	$(XENOMAI_NATIVE_CFLAGS) \
-	$(XENOMAI_RTDM_CFLAGS)
+	$(XENOMAI_NATIVE_CFLAGS)
 
 ec_xenomai_example_LDFLAGS = \
 	-L$(top_builddir)/lib/.libs -lethercat_rtdm \
-	$(XENOMAI_NATIVE_LDFLAGS) \
-	$(XENOMAI_RTDM_LDFLAGS)
+	$(XENOMAI_NATIVE_LDFLAGS)
 
 #------------------------------------------------------------------------------

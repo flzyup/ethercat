@@ -1,4 +1,20 @@
 ------------------------------------------------------------------------------
+IMPORTANT NOTICE
+1) This project is try to migrate etherlab project to support xenomai 3.x
+2) Thanks Edouard for his work: https://hg.beremiz.org/etherlabmaster/
+3) I merge Edouard work to this origin project
+4) Use at your own risk!! This project may not compile success
+
+------------------------------------------------------------------------------
+Compile steps:
+1) ./bootstrap
+2) ./configure --disable-8139too --enable-igb --enable-cycles --enable-rtdm --enable-hrtimer --with-xenomai-dir=/usr/xenomai/ --prefix=/usr/etherlab
+3) make -j<number of cpus> all modules
+4) (read INSTALL)
+
+------------------------------------------------------------------------------
+↓↓↓↓↓↓ The following is origin README ↓↓↓↓↓↓
+------------------------------------------------------------------------------
 
 This is the README file of the IgH EtherCAT Master.
 

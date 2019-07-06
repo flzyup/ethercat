@@ -40,9 +40,6 @@
 #include <sys/mman.h>
 #include <time.h>
 
-#include <rtdm/rtdm.h>
-#include <rtdk.h>
-
 #include "ecrt.h"
 
 #define NSEC_PER_SEC 1000000000
@@ -74,7 +71,7 @@ static ec_slave_config_t *sc_dig_out_01 = NULL;
 #define DigOutSlave01_Pos 0, 1
 
 #define Beckhoff_EK1100 0x00000002, 0x044c2c52
-#define Beckhoff_EL2004 0x00000002, 0x07d43052
+#define Beckhoff_EL2088 0x00000002, 0x08283052
 
 // offsets for PDO entries
 static unsigned int off_dig_out0 = 0;
@@ -82,7 +79,7 @@ static unsigned int off_dig_out0 = 0;
 // process data
 
 const static ec_pdo_entry_reg_t domain1_regs[] = {
-   {DigOutSlave01_Pos, Beckhoff_EL2004, 0x7000, 0x01, &off_dig_out0, NULL},
+   {DigOutSlave01_Pos, Beckhoff_EL2088, 0x7000, 0x01, &off_dig_out0, NULL},
    {}
 };
 
@@ -124,11 +121,11 @@ void rt_check_domain_state(void)
 	ecrt_domain_state(domain1, &ds);
 
     if (ds.working_counter != domain1_state.working_counter) {
-        rt_printf("Domain1: WC %u.\n", ds.working_counter);
+        printf("Domain1: WC %u.\n", ds.working_counter);
     }
 
     if (ds.wc_state != domain1_state.wc_state) {
-        rt_printf("Domain1: State %u.\n", ds.wc_state);
+        printf("Domain1: State %u.\n", ds.wc_state);
     }
 
     domain1_state = ds;
@@ -143,15 +140,15 @@ void rt_check_master_state(void)
 	ecrt_master_state(master, &ms);
 
     if (ms.slaves_responding != master_state.slaves_responding) {
-        rt_printf("%u slave(s).\n", ms.slaves_responding);
+        printf("%u slave(s).\n", ms.slaves_responding);
     }
 
     if (ms.al_states != master_state.al_states) {
-        rt_printf("AL states: 0x%02X.\n", ms.al_states);
+        printf("AL states: 0x%02X.\n", ms.al_states);
     }
 
     if (ms.link_up != master_state.link_up) {
-        rt_printf("Link is %s.\n", ms.link_up ? "up" : "down");
+        printf("Link is %s.\n", ms.link_up ? "up" : "down");
     }
 
     master_state = ms;
@@ -164,8 +161,11 @@ void *my_thread(void *arg)
     struct timespec next_period;
     int cycle_counter = 0;
 	unsigned int blink = 0;
+    struct sched_param  param = { .sched_priority = 80 };
 
-    clock_gettime(CLOCK_REALTIME, &next_period);
+    pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
+    
+    clock_gettime(CLOCK_MONOTONIC, &next_period);
 
     while (run) {
         next_period.tv_nsec += cycle_us * 1000;
@@ -174,7 +174,7 @@ void *my_thread(void *arg)
 			next_period.tv_sec++;
 		}
 
-        clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next_period, NULL);
+        clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_period, NULL);
 
         cycle_counter++;
 
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
     }
 
     sc_dig_out_01 =
-        ecrt_master_slave_config(master, DigOutSlave01_Pos, Beckhoff_EL2004);
+        ecrt_master_slave_config(master, DigOutSlave01_Pos, Beckhoff_EL2088);
     if (!sc_dig_out_01) {
         fprintf(stderr, "Failed to get slave configuration.\n");
         return -1;
@@ -271,15 +271,9 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    /* Create cyclic RT-thread */
-    struct sched_param param = { .sched_priority = 82 };
-
     pthread_attr_t thattr;
     pthread_attr_init(&thattr);
     pthread_attr_setdetachstate(&thattr, PTHREAD_CREATE_JOINABLE);
-    pthread_attr_setinheritsched(&thattr, PTHREAD_EXPLICIT_SCHED);
-    pthread_attr_setschedpolicy(&thattr, SCHED_FIFO);
-    pthread_setschedparam(cyclic_thread, SCHED_FIFO, &param);
 
     ret = pthread_create(&cyclic_thread, &thattr, &my_thread, NULL);
     if (ret) {

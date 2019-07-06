@@ -66,8 +66,8 @@ libethercat_rtdm_la_CFLAGS = $(libethercat_la_CFLAGS) -DUSE_RTDM
 libethercat_rtdm_la_LDFLAGS = $(libethercat_la_LDFLAGS)
 
 if ENABLE_XENOMAI
-libethercat_rtdm_la_CFLAGS += $(XENOMAI_RTDM_CFLAGS)
-libethercat_rtdm_la_LDFLAGS += $(XENOMAI_RTDM_LDFLAGS)
+libethercat_rtdm_la_CFLAGS += $(XENOMAI_LIB_CFLAGS)
+libethercat_rtdm_la_LDFLAGS += $(XENOMAI_LIB_LDFLAGS)
 endif
 
 if ENABLE_RTAI

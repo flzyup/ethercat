@@ -85,7 +85,7 @@ modules:
 
 modules_install:
 	$(MAKE) -C "$(LINUX_SOURCE_DIR)" M="@abs_srcdir@" \
-		INSTALL_MOD_DIR="$(INSTALL_MOD_DIR)" modules_install
+		$(INSTALL_MOD_PATH_DEFS) modules_install
 
 clean-local:
 	$(MAKE) -C "$(LINUX_SOURCE_DIR)" M="@abs_srcdir@" clean

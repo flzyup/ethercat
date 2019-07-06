@@ -44,6 +44,13 @@ ifeq (@ENABLE_GENERIC@,1)
 	CFLAGS_$(EC_GENERIC_OBJ) = -DREV=$(REV)
 endif
 
+ifeq (@ENABLE_RTDMNET@,1)
+	EC_RTDMNET_OBJ := rtdmnet.o
+	obj-m += ec_rtdmnet.o
+	ec_rtdmnet-objs := $(EC_RTDMNET_OBJ)
+	CFLAGS_$(EC_RTDMNET_OBJ) = -DREV=$(REV) -Idrivers/xenomai/net/stack/include
+endif
+
 ifeq (@ENABLE_8139TOO@,1)
 	EC_8139TOO_OBJ := 8139too-@KERNEL_8139TOO@-ethercat.o
 	obj-m += ec_8139too.o

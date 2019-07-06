@@ -152,21 +152,38 @@ AC_MSG_RESULT([$LINUX_SOURCE_DIR (Kernel $linuxversion)])
 fi
 
 #------------------------------------------------------------------------------
+# Linux module installation directory
+#------------------------------------------------------------------------------
+
+AC_ARG_WITH([module-path],
+    AC_HELP_STRING(
+        [--with-module-path=<DIR>],
+        [Linux module installation path. Default: /lib/modules/kernel_version]
+    ),
+    [modpathdefs="INSTALL_MOD_PATH='$withval'"],
+    [modpathdefs=""]
+)
+
+AC_MSG_CHECKING([for Linux modules installation directory])
+AC_MSG_RESULT([$with_mod_path])
+
+#------------------------------------------------------------------------------
 # Linux module installation subdirectory
 #------------------------------------------------------------------------------
 
 AC_ARG_WITH([module-dir],
     AC_HELP_STRING(
         [--with-module-dir=<DIR>],
-        [Linux module installation dir. Default: ethercat]
+        [Linux module installation subdir. Default: ethercat]
     ),
-    [moddir=[$withval]],
-    [moddir="ethercat"]
+    [modpathdefs="$modpathdefs INSTALL_MOD_DIR='$withval'"],
+    [modpathdefs=""]
 )
-AC_SUBST(INSTALL_MOD_DIR,[$moddir])
 
-AC_MSG_CHECKING([for Linux modules installation directory])
-AC_MSG_RESULT([$INSTALL_MOD_DIR])
+AC_MSG_CHECKING([for Linux modules installation subdirectory])
+AC_MSG_RESULT([$with_mod_dir])
+
+AC_SUBST(INSTALL_MOD_PATH_DEFS,[$modpathdefs])
 
 #------------------------------------------------------------------------------
 # Generic Ethernet driver
@@ -190,6 +207,29 @@ AC_ARG_ENABLE([generic],
 
 AM_CONDITIONAL(ENABLE_GENERIC, test "x$enablegeneric" = "x1")
 AC_SUBST(ENABLE_GENERIC,[$enablegeneric])
+
+#------------------------------------------------------------------------------
+# RTDM Ethernet driver
+#------------------------------------------------------------------------------
+
+AC_ARG_ENABLE([rtdmnet],
+    AS_HELP_STRING([--enable-rtdmnet],
+                   [Enable RTDM Ethernet driver]),
+    [
+        case "${enableval}" in
+            yes) enablertdmnet=1
+                ;;
+            no) enablertdmnet=0
+                ;;
+            *) AC_MSG_ERROR([Invalid value for --enable-rtdmnet])
+                ;;
+        esac
+    ],
+    [enablertdmnet=$enablekernel]
+)
+
+AM_CONDITIONAL(ENABLE_RTDMNET, test "x$enablertdmnet" = "x1")
+AC_SUBST(ENABLE_RTDMNET,[$enablertdmnet])
 
 #------------------------------------------------------------------------------
 # 8139too driver
@@ -679,22 +719,35 @@ AC_ARG_WITH([xenomai-dir],
     ]
 )
 
+AC_ARG_WITH([xenomai-config],
+    AC_HELP_STRING(
+        [--with-xenomai-config=<CMD>],
+        [Xenomai config invokation, default to xenomai-dir/bin/xeno-config]
+    ),
+    [
+        xenomaiconfig=[$withval]
+    ],
+    [
+        xenomaiconfig="$xenomaidir/bin/xeno-config"
+    ]
+)
+
 AC_MSG_CHECKING([for Xenomai path])
 
 if test -z "${xenomaidir}"; then
     AC_MSG_RESULT([not specified.])
 else
-    if test \! -r ${xenomaidir}/include/xeno_config.h; then
+    if test \! -r ${xenomaiconfig}; then
         AC_MSG_ERROR([no Xenomai installation found in ${xenomaidir}!])
     fi
     AC_MSG_RESULT([$xenomaidir])
 
-    xeno_native_cflags=`$xenomaidir/bin/xeno-config --skin native --cflags`
-    xeno_native_ldflags=`$xenomaidir/bin/xeno-config --skin native --ldflags`
-    xeno_posix_cflags=`$xenomaidir/bin/xeno-config --skin posix --cflags`
-    xeno_posix_ldflags=`$xenomaidir/bin/xeno-config --skin posix --ldflags`
-    xeno_rtdm_cflags=`$xenomaidir/bin/xeno-config --skin rtdm --cflags`
-    xeno_rtdm_ldflags=`$xenomaidir/bin/xeno-config --skin rtdm --ldflags`
+    xeno_native_cflags=`$xenomaiconfig --alchemy --cflags`
+    xeno_native_ldflags=`$xenomaiconfig --alchemy --ldflags`
+    xeno_posix_cflags=`$xenomaiconfig --posix --cflags`
+    xeno_posix_ldflags=`$xenomaiconfig --posix --ldflags`
+    xeno_lib_cflags=`$xenomaiconfig --posix --cflags`
+    xeno_lib_ldflags=`$xenomaiconfig --posix --auto-init-solib --ldflags`
 fi
 
 AC_SUBST(XENOMAI_DIR,[$xenomaidir])

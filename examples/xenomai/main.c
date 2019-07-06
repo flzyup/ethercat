@@ -38,11 +38,10 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <rtdm/rtdm.h>
-#include <native/task.h>
-#include <native/sem.h>
-#include <native/mutex.h>
-#include <native/timer.h>
-#include <rtdk.h>
+#include <alchemy/task.h>
+#include <alchemy/sem.h>
+#include <alchemy/mutex.h>
+#include <alchemy/timer.h>
 #include <pthread.h>
 
 #include "ecrt.h"
@@ -122,11 +121,11 @@ void rt_check_domain_state(void)
 	ecrt_domain_state(domain1, &ds);
 
     if (ds.working_counter != domain1_state.working_counter) {
-        rt_printf("Domain1: WC %u.\n", ds.working_counter);
+        printf("Domain1: WC %u.\n", ds.working_counter);
     }
 
     if (ds.wc_state != domain1_state.wc_state) {
-        rt_printf("Domain1: State %u.\n", ds.wc_state);
+        printf("Domain1: State %u.\n", ds.wc_state);
     }
 
     domain1_state = ds;
@@ -141,15 +140,15 @@ void rt_check_master_state(void)
 	ecrt_master_state(master, &ms);
 
     if (ms.slaves_responding != master_state.slaves_responding) {
-        rt_printf("%u slave(s).\n", ms.slaves_responding);
+        printf("%u slave(s).\n", ms.slaves_responding);
     }
 
     if (ms.al_states != master_state.al_states) {
-        rt_printf("AL states: 0x%02X.\n", ms.al_states);
+        printf("AL states: 0x%02X.\n", ms.al_states);
     }
 
     if (ms.link_up != master_state.link_up) {
-        rt_printf("Link is %s.\n", ms.link_up ? "up" : "down");
+        printf("Link is %s.\n", ms.link_up ? "up" : "down");
     }
 
     master_state = ms;
@@ -209,9 +208,6 @@ int main(int argc, char *argv[])
     ec_slave_config_t *sc;
     int ret;
 
-    /* Perform auto-init of rt_print buffers if the task doesn't do so */
-    rt_print_auto_init(1);
-
     signal(SIGTERM, signal_handler);
     signal(SIGINT, signal_handler);
 
@@ -263,7 +259,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    ret = rt_task_create(&my_task, "my_task", 0, 80, T_FPU);
+    ret = rt_task_create(&my_task, "my_task", 0, 80, 0);
     if (ret < 0) {
         fprintf(stderr, "Failed to create task: %s\n", strerror(-ret));
         return -1;

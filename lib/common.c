@@ -77,7 +77,7 @@ ec_master_t *ecrt_open_master(unsigned int master_index)
 
     master = malloc(sizeof(ec_master_t));
     if (!master) {
-        EC_PRINT_ERR("Failed to allocate memory.\n");
+        fprintf(stderr, "Failed to allocate memory.\n");
         return 0;
     }
 
@@ -87,18 +87,10 @@ ec_master_t *ecrt_open_master(unsigned int master_index)
     master->first_config = NULL;
 
     snprintf(path, MAX_PATH_LEN - 1,
-#ifdef USE_RTDM
-            "EtherCAT%u",
-#else
             "/dev/EtherCAT%u",
-#endif
             master_index);
 
-#ifdef USE_RTDM
-    master->fd = rt_dev_open(path, O_RDWR);
-#else
     master->fd = open(path, O_RDWR);
-#endif
     if (EC_IOCTL_IS_ERROR(master->fd)) {
         EC_PRINT_ERR("Failed to open %s: %s\n", path,
                 strerror(EC_IOCTL_ERRNO(master->fd)));

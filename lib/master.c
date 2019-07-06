@@ -89,11 +89,7 @@ void ec_master_clear(ec_master_t *master)
     ec_master_clear_config(master);
 
     if (master->fd != -1) {
-#if USE_RTDM
-        rt_dev_close(master->fd);
-#else
         close(master->fd);
-#endif
     }
 }
 
@@ -583,12 +579,6 @@ int ecrt_master_setup_domain_memory(ec_master_t *master)
     if (io.process_data_size) {
         master->process_data_size = io.process_data_size;
 
-#ifdef USE_RTDM
-        /* memory-mapping was already done in kernel. The user-space addess is
-         * provided in the ioctl data.
-         */
-        master->process_data = io.process_data;
-#else
         master->process_data = mmap(0, master->process_data_size,
                 PROT_READ | PROT_WRITE, MAP_SHARED, master->fd, 0);
         if (master->process_data == MAP_FAILED) {
@@ -598,7 +588,6 @@ int ecrt_master_setup_domain_memory(ec_master_t *master)
             master->process_data_size = 0;
             return -errno;
         }
-#endif
 
         // Access the mapped region to cause the initial page fault
         master->process_data[0] = 0x00;
@@ -625,12 +614,7 @@ int ecrt_master_activate(ec_master_t *master)
     if (io.process_data_size) {
         master->process_data_size = io.process_data_size;
 
-#ifdef USE_RTDM
-        /* memory-mapping was already done in kernel. The user-space addess is
-         * provided in the ioctl data.
-         */
-        master->process_data = io.process_data;
-#else
+    if (master->process_data_size) {
         master->process_data = mmap(0, master->process_data_size,
                 PROT_READ | PROT_WRITE, MAP_SHARED, master->fd, 0);
         if (master->process_data == MAP_FAILED) {
@@ -640,7 +624,6 @@ int ecrt_master_activate(ec_master_t *master)
             master->process_data_size = 0;
             return -errno;
         }
-#endif
 
         // Access the mapped region to cause the initial page fault
         master->process_data[0] = 0x00;
