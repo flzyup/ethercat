@@ -163,7 +163,6 @@ noinst_HEADERS = \
 	e100-4.9-orig.c \
 	ecdev.h \
 	generic.c \
-	rtdmnet.c \
 	r8169-2.6.24-ethercat.c \
 	r8169-2.6.24-orig.c \
 	r8169-2.6.27-ethercat.c \
